@@ -6,6 +6,7 @@ import { FavoritesProvider } from '../contexts/favorites.context.js';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 SplashScreen.preventAutoHideAsync(); // 確保載入畫面不會提前消失
 
 export default function AppLayout() {
@@ -24,6 +25,7 @@ export default function AppLayout() {
   }
 
   return (
+    <SafeAreaView style={styles.safeArea}>
       <FavoritesProvider>
       <Tabs
         screenOptions={({ route }) => ({
@@ -58,37 +60,45 @@ export default function AppLayout() {
           name="index"
           options={{
             title: '首頁',
+            headerShown: false,
           }}
         />
         <Tabs.Screen
           name="data"
           options={{
             title: '資料',
+            headerShown: false,
           }}
         />
         <Tabs.Screen
           name="collect"
           options={{
             title: '收藏',
+            headerShown: false,
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
             title: '會員',
+            headerShown: false,
           }}
         />
         
       </Tabs>
       </FavoritesProvider>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1, // 確保 SafeAreaView 撐滿全屏
+  }, 
   tabBar: {
-    height: 60,
-    paddingBottom: 5,
-    paddingTop: 5,
+    height: 70,
+    paddingBottom: 10,
+    paddingTop: 10,
     paddingHorizontal: 20,
   },
   tabIconContainer: {

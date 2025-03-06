@@ -377,33 +377,37 @@ const DataScreen = () => {
   };
   
   return (
-    <View style={styles.dataContainer}>
-      {renderFilterCollapsible()}
-      {renderFilterModal()}
-      
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>資料正在路上，請稍候...</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredAnimals}
-          renderItem={renderAnimalItem}
-          keyExtractor={(item) => item?.animal_id || Math.random().toString()}
-          style={styles.animalList}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>沒有符合條件的資料</Text>
-            </View>
-          }
-        />
-      )}
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.dataContainer}>
+        {renderFilterCollapsible()}
+        {renderFilterModal()}
+        
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>資料正在路上，請稍候...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredAnimals}
+            renderItem={renderAnimalItem}
+            keyExtractor={(item) => item?.animal_id || Math.random().toString()}
+            style={styles.animalList}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>沒有符合條件的資料</Text>
+              </View>
+            }
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  // 保持原有的樣式...
+  safeArea: {
+    flex: 1, // 確保 SafeAreaView 撐滿全屏
+  },
   dataContainer: {
     flex: 1,
     backgroundColor: '#f5f5f5',

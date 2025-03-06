@@ -28,7 +28,7 @@ export default function HomeScreen() {
   
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: '動物領養應用' }} />
+      <Stack.Screen options={{ title: '首頁' }} />
       
       <View style={styles.header}>
         <Text style={styles.title}>動物領養平台</Text>
