@@ -10,14 +10,9 @@ import {
   ScrollView,
   Modal,
   SafeAreaView,
-  Dimensions,
-  Platform
 } from 'react-native';
-import ModalDropdown from 'react-native-modal-dropdown';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
-const { height } = Dimensions.get('window');
 
 const DataScreen = () => {
   const router = useRouter();
@@ -186,7 +181,7 @@ const DataScreen = () => {
     return (
       <TouchableOpacity 
         style={styles.animalCard}
-        onPress={() => router.push(`/item/${safeItem.animal_id}`)}
+        onPress={() => router.push(`/item/${item.animal_id}`)}
       >
         <View style={styles.animalInfo}>
           {safeItem.album_file ? (
@@ -224,7 +219,7 @@ const DataScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.detailButton}
-            onPress={() => router.push(`/item/${safeItem.animal_id}`)}
+            onPress={() => router.push(`/item/${item.animal_id}`)}
           >
             <Ionicons name="information-circle-outline" size={24} color="#4a80f5" />
             <Text style={styles.detailButtonText}>詳細資料</Text>

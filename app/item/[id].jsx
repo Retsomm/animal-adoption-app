@@ -131,7 +131,6 @@ const AnimalDetailScreen = () => {
   const getDefaultIfEmpty = (value) => value || "未提供";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity 
@@ -282,15 +281,10 @@ const AnimalDetailScreen = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
-    
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1, // 確保 SafeAreaView 撐滿全屏
-  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

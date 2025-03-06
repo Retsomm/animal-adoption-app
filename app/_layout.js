@@ -84,6 +84,14 @@ export default function AppLayout() {
             headerShown: false,
           }}
         />
+        <Tabs.Screen
+          name="item"
+          options={{
+            tabBarButton: () => null,
+            headerShown: false,
+            tabBarStyle: { display: 'none' }
+          }}
+        />
         
       </Tabs>
       </FavoritesProvider>
@@ -96,10 +104,11 @@ const styles = StyleSheet.create({
     flex: 1, // 確保 SafeAreaView 撐滿全屏
   }, 
   tabBar: {
-    height: 70,
+    height: 50,
     paddingBottom: 10,
     paddingTop: 10,
     paddingHorizontal: 20,
+    paddingLeft: 65,
   },
   tabIconContainer: {
     alignItems: 'center',
