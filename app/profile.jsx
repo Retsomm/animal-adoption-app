@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     backgroundColor: 'white',
-    marginTop: 15,
+    margin: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderTopWidth: 1,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
+    margin: 15,
     color: '#333',
   },
   infoItem: {

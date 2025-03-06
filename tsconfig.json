@@ -11,5 +11,5 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-, "app/_layout.js", "app/item/_layout.js"  ]
+, "app/_layout.js", "components/item/_layout.js"  ]
 }

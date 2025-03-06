@@ -19,10 +19,6 @@ const AnimalDetailScreen = () => {
   const [error, setError] = useState(null);
   const isMounted = useRef(true);
   
-  // 加入除錯訊息
-  console.log('路由參數:', params);
-  console.log('動物ID:', id);
-  
   // 使用 useMemo 來計算是否在收藏中，避免不必要的重新計算
   const isInFavorites = favorites ? favorites.some(fav => fav.animal_id === id) : false;
 
