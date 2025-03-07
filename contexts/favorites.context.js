@@ -51,20 +51,42 @@ export const FavoritesProvider = ({ children }) => {
   useEffect(() => {
     const loadFavorites = async () => {
       try {
+        console.log('嘗試從儲存中載入收藏資料');
         const storedFavorites = await storage.getItem('favorites');
+        
         if (storedFavorites !== null && isMounted.current) {
-          setFavorites(JSON.parse(storedFavorites));
+          try {
+            const parsedFavorites = JSON.parse(storedFavorites);
+            if (Array.isArray(parsedFavorites)) {
+              console.log(`成功載入 ${parsedFavorites.length} 個收藏項目`);
+              setFavorites(parsedFavorites);
+            } else {
+              console.warn('儲存的收藏不是陣列格式，重置為空陣列');
+              setFavorites([]);
+            }
+          } catch (parseError) {
+            console.error('解析收藏資料時出錯', parseError);
+            setFavorites([]);
+          }
+        } else {
+          console.log('沒有找到儲存的收藏或組件已卸載');
         }
       } catch (error) {
-        console.error('Failed to load favorites from storage', error);
+        console.error('從儲存中載入收藏時失敗', error);
       } finally {
         if (isMounted.current) {
           setIsLoaded(true);
+          console.log('收藏資料載入完成');
         }
       }
     };
 
-    loadFavorites();
+    // 添加短暫延遲確保組件已完全掛載
+    const timer = setTimeout(() => {
+      loadFavorites();
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // 更新存儲
@@ -72,37 +94,44 @@ export const FavoritesProvider = ({ children }) => {
     if (isLoaded) {
       const saveFavorites = async () => {
         try {
+          console.log(`嘗試儲存 ${favorites.length} 個收藏項目`);
           await storage.setItem('favorites', JSON.stringify(favorites));
+          console.log('收藏儲存成功');
         } catch (error) {
-          console.error('Failed to save favorites to storage', error);
+          console.error('儲存收藏到儲存時失敗', error);
         }
       };
 
       saveFavorites();
     }
   }, [favorites, isLoaded]);
-  useEffect(() => {
-    // 添加短暫延遲確保組件已完全掛載
-    const timer = setTimeout(() => {
-      const loadFavorites = async () => {
-        // 加載邏輯
-      };
-      loadFavorites();
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
+
   // 添加到收藏
   const addToFavorites = (animal) => {
+    if (!animal || !animal.animal_id) {
+      console.error('嘗試添加無效的動物到收藏', animal);
+      return;
+    }
+    
     // 檢查是否已存在於收藏中
     const exists = favorites.some(fav => fav.animal_id === animal.animal_id);
+    
     if (!exists) {
+      console.log(`添加動物 ID: ${animal.animal_id} 到收藏`);
       setFavorites(prev => [...prev, animal]);
+    } else {
+      console.log(`動物 ID: ${animal.animal_id} 已經在收藏中`);
     }
   };
 
   // 從收藏中移除
   const removeFromFavorites = (animal) => {
+    if (!animal || !animal.animal_id) {
+      console.error('嘗試從收藏中移除無效的動物', animal);
+      return;
+    }
+    
+    console.log(`從收藏中移除動物 ID: ${animal.animal_id}`);
     setFavorites(prev => 
       prev.filter(fav => fav.animal_id !== animal.animal_id)
     );

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator} from 'react-native';
 import { Link, Stack } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { ThemeContext } from '@/contexts/ThemeContext';
-
 export default function HomeScreen() {
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   
@@ -29,59 +28,71 @@ export default function HomeScreen() {
   }
   
   return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: '首頁' }} />
-      
-      <View style={styles.header}>
-        <Text style={styles.title}>動物領養平台</Text>
-        <Text style={styles.subtitle}>幫助無家可歸的動物找到溫暖的家</Text>
+      <View style={styles.container}>
+            <Stack.Screen options={{ title: '首頁' }} />
+            
+            <View style={styles.header}>
+              <Text style={styles.title}>動物領養平台
+              <TouchableOpacity 
+                style={styles.themeToggle}
+                onPress={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')}>
+                <FontAwesome 
+                  name={colorScheme === 'dark' ? 'moon-o' : 'sun-o'} 
+                  size={24} 
+                  color={theme.icon} 
+                />
+              </TouchableOpacity>
+              </Text>
+              <Text style={styles.subtitle}>幫助無家可歸的動物找到溫暖的家</Text>
+            </View>
+            
+            <View style={styles.imageContainer}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1529778873920-4da4926a72c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1036&q=80' }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            </View>
+            
+            <View style={styles.infoSection}>
+              <Text style={styles.infoTitle}>一起來幫助流浪動物</Text>
+              <Text style={styles.infoText}>
+                本應用程式提供全台灣各收容所的動物資訊，幫助您找到最適合的寵物夥伴。
+                您可以瀏覽不同地區的待認養動物，並查看詳細資訊。
+              </Text>
+            </View>
+            
+            <View style={styles.buttonContainer}>
+              <Link href="/data" asChild>
+              <TouchableOpacity style={styles.button}>
+                <FontAwesome name="search" size={24} style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>開始瀏覽動物資料</Text>
+              </TouchableOpacity>
+              </Link>
+            </View>
+            <View style={styles.featureContainer}>
+              <View style={styles.featureItem}>
+                <FontAwesome name="filter" size={24} color="#4a80f5" />
+                <Text style={styles.featureText}>多種篩選條件</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <FontAwesome name="heart" size={24} color="#4a80f5" />
+                <Text style={styles.featureText}>收藏喜愛動物</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <FontAwesome name="info-circle" size={24} color="#4a80f5" />
+                <Text style={styles.featureText}>詳細資訊查詢</Text>
+              </View>
+            </View>
       </View>
-      
-      <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: 'https://images.unsplash.com/photo-1529778873920-4da4926a72c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1036&q=80' }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-      </View>
-      
-      <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>一起來幫助流浪動物</Text>
-        <Text style={styles.infoText}>
-          本應用程式提供全台灣各收容所的動物資訊，幫助您找到最適合的寵物夥伴。
-          您可以瀏覽不同地區的待認養動物，並查看詳細資訊。
-        </Text>
-      </View>
-      
-      <View style={styles.buttonContainer}>
-        <Link href="/data" asChild>
-          <TouchableOpacity style={styles.button}>
-            <Ionicons name="search"  size={24} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>開始瀏覽動物資料</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
-      
-      <View style={styles.featureContainer}>
-        <View style={styles.featureItem}>
-          <Ionicons name="filter" size={24} color="#4a80f5" />
-          <Text style={styles.featureText}>多種篩選條件</Text>
-        </View>
-        <View style={styles.featureItem}>
-          <Ionicons name="heart" size={24} color="#4a80f5" />
-          <Text style={styles.featureText}>收藏喜愛動物</Text>
-        </View>
-        <View style={styles.featureItem}>
-          <Ionicons name="information-circle" size={24} color="#4a80f5" />
-          <Text style={styles.featureText}>詳細資訊查詢</Text>
-        </View>
-      </View>
-    </View>
   );
 }
 
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
+    SafeAreaView:{
+      flex:1
+    },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
@@ -154,19 +165,21 @@ function createStyles(theme, colorScheme) {
       marginBottom: 20,
     },
     button: {
-      backgroundColor: theme.button,
+      backgroundColor: colorScheme === 'dark' ? "black" : "white",
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       padding: 15,
       borderRadius: 10,
+      borderColor:colorScheme === 'dark' ? "white" : "black",
+      borderWidth:1
     },
     buttonIcon: {
       marginRight: 10,
-      color: colorScheme === 'dark' ? "black" : "white",
+      color: colorScheme === 'dark' ? "white" : "black",
     },
     buttonText: {
-      color: colorScheme === 'dark' ? "black" : "white",
+      color: colorScheme === 'dark' ? "white" : "black",
       fontSize: 16,
       fontWeight: 'bold',
     },
@@ -184,5 +197,8 @@ function createStyles(theme, colorScheme) {
       fontSize: 14,
       color: theme.text,
     },
+    themeToggle: {
+      paddingLeft:10, 
+    }
   });
 }

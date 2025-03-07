@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { FavoritesProvider } from '../contexts/favorites.context.js';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -45,21 +46,21 @@ function AppContent() {
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
               let iconName = 'home';
-
+            
               if (route.name === 'index') {
-                iconName = focused ? 'home' : 'home-outline';
+                iconName = focused ? 'home' : 'home';
               } else if (route.name === 'data') {
-                iconName = focused ? 'list' : 'list-outline';
+                iconName = focused ? 'list' : 'list';
               } else if (route.name === 'collect') {
-                iconName = focused ? 'heart' : 'heart-outline';
+                iconName = focused ? 'heart' : 'heart-o';
               } else if (route.name === 'profile') {
-                iconName = focused ? 'person' : 'person-outline';
+                iconName = focused ? 'user' : 'user-o';
               }
-
+            
               // 使用 View 包裹圖標，提供更好的間距控制
               return (
                 <View style={styles.tabIconContainer}>
-                  <Ionicons name={iconName} size={size} color={color} />
+                  <FontAwesome name={iconName} size={size} color={color} />
                 </View>
               );
             },

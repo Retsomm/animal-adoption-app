@@ -5,10 +5,10 @@ import {
   ActivityIndicator, TouchableOpacity, Alert
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useFavorites } from '../../contexts/favorites.context.js';
 import { ThemeContext } from '@/contexts/ThemeContext';
-
+ 
 const AnimalDetailScreen = () => {
   const params = useLocalSearchParams();
   const { id } = params;
@@ -19,12 +19,9 @@ const AnimalDetailScreen = () => {
   const [error, setError] = useState(null);
   const isMounted = useRef(true);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
-  
-  // 先建立樣式
   const styles = createStyles(theme, colorScheme);
-  
-  // 使用 useMemo 來計算是否在收藏中，避免不必要的重新計算
-  const isInFavorites = favorites ? favorites.some(fav => fav.animal_id === id) : false;
+  // 檢查動物是否在收藏中
+  const isInFavorites = favorites.some(fav => fav.animal_id === id);
 
   // 組件卸載時清理
   useEffect(() => {
@@ -32,12 +29,12 @@ const AnimalDetailScreen = () => {
       isMounted.current = false;
     };
   }, []);
-
   useEffect(() => {
     const fetchAnimalDetail = async () => {
       if (!id) {
         console.log('無法取得ID參數');
         setError('無法取得動物ID');
+        setLoading(false);
         return;
       }
       
@@ -45,13 +42,34 @@ const AnimalDetailScreen = () => {
         if (isMounted.current) setLoading(true);
         
         console.log('開始獲取動物資料，ID:', id);
-        const response = await fetch('https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL');
+        
+        // 使用加載超時控制
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超時
+        
+        const response = await fetch(
+          'https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL', 
+          { signal: controller.signal }
+        );
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`API 回應錯誤: ${response.status}`);
+        }
+        
         const data = await response.json();
+        
+        if (!Array.isArray(data)) {
+          throw new Error('API 返回的數據格式不正確');
+        }
         
         console.log('API回應數據長度:', data.length);
         
-        // 使用字符串比較而不是直接比較
-        const foundAnimal = data.find(item => String(item.animal_id) === String(id));
+        // 使用字符串比較
+        const foundAnimal = data.find(item => 
+          item && item.animal_id && String(item.animal_id) === String(id)
+        );
         
         console.log('找到動物?', foundAnimal ? '是' : '否');
         
@@ -60,9 +78,11 @@ const AnimalDetailScreen = () => {
         if (foundAnimal) {
           console.log('成功設置動物資料');
           setAnimal(foundAnimal);
+          setLoading(false);
         } else {
           console.log('找不到動物數據，ID:', id);
           setError('找不到該動物資料');
+          setLoading(false);
           
           // 使用 setTimeout 確保不在渲染期間執行 Alert
           setTimeout(() => {
@@ -78,15 +98,16 @@ const AnimalDetailScreen = () => {
                 ]
               );
             }
-          }, 0);
+          }, 100);
         }
       } catch (error) {
-        console.error('獲取動物數據時出錯:', error);
+        console.error('獲取動物數據時出錯:', error.message);
         if (isMounted.current) {
-          setError('載入動物資料時發生錯誤');
-        }
-      } finally {
-        if (isMounted.current) {
+          if (error.name === 'AbortError') {
+            setError('載入動物資料超時，請檢查網路連接');
+          } else {
+            setError('載入動物資料時發生錯誤: ' + error.message);
+          }
           setLoading(false);
         }
       }
@@ -95,6 +116,7 @@ const AnimalDetailScreen = () => {
     fetchAnimalDetail();
   }, [id, router]);
 
+  // 切換收藏狀態的函數
   const toggleFavorite = () => {
     if (!animal) return;
     
@@ -114,11 +136,10 @@ const AnimalDetailScreen = () => {
       </View>
     );
   }
-
   if (error || !animal) {
     return (
       <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="#ff6b6b" />
+        <FontAwesome name="exclamation-circle" size={60} color="#ff6b6b" />
         <Text style={styles.errorText}>{error || '找不到該動物資料'}</Text>
         <Text style={styles.debugText}>請求的ID: {id}</Text>
         <TouchableOpacity 
@@ -130,30 +151,18 @@ const AnimalDetailScreen = () => {
       </View>
     );
   }
-
   // 處理可能缺失的資料
   const getDefaultIfEmpty = (value) => value || "未提供";
   
   return (
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButtonContainer}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.favoriteButtonContainer}
-            onPress={toggleFavorite}
-          >
-            <Ionicons 
-              name={isInFavorites ? "heart" : "heart-outline"} 
-              size={24} 
-              color={isInFavorites ? "red" : "#333"} 
-            />
-          </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.backButtonContainer}
+          onPress={() => router.push('/data')}
+        >
+          <FontAwesome name="arrow-left" size={24} style={styles.arrowIcon}/>
+        </TouchableOpacity>
         </View>
 
         <View style={styles.imageContainer}>
@@ -298,6 +307,7 @@ function createStyles(theme, colorScheme) {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: theme.background,
     },
     loadingText: {
       marginTop: 10,
@@ -310,6 +320,7 @@ function createStyles(theme, colorScheme) {
       justifyContent: 'center',
       alignItems: 'center',
       padding: 20,
+      backgroundColor: theme.background,
     },
     errorText: {
       fontSize: 18,
@@ -322,9 +333,10 @@ function createStyles(theme, colorScheme) {
       paddingHorizontal: 20,
       backgroundColor: theme.button,
       borderRadius: 5,
+      marginTop: 10,
     },
     backButtonText: {
-      color: colorScheme === 'dark' ? "black" : "white",
+      color: colorScheme === 'dark' ? "white" : "black",
       fontSize: 16,
     },
     header: {
@@ -444,6 +456,9 @@ function createStyles(theme, colorScheme) {
       borderRadius: 5,
       margin: 5,
     },
+    arrowIcon:{
+      color: theme.text,
+    }
   });
 }
 

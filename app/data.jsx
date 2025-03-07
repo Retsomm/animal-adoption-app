@@ -11,13 +11,13 @@ import {
   Modal,
   SafeAreaView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ThemeContext } from '@/contexts/ThemeContext';
-
+import { useFavorites } from '../contexts/favorites.context.js';
 const DataScreen = () => {
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
-  
+  const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [animals, setAnimals] = useState([]);
@@ -103,7 +103,6 @@ const DataScreen = () => {
       setLoading(false);
     }
   };
-  
   // 初次載入時抓取資料
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -165,11 +164,11 @@ const DataScreen = () => {
     }
   }, [filters, animals]);
   
-  // 簡化版的渲染動物項目函數
+  //渲染動物項目函數
   const renderAnimalItem = ({ item }) => {
     if (!item) return null;
     
-    // 確保item是有效的對象
+    // 確保 item 是有效的對象
     const safeItem = {
       animal_id: item.animal_id || 'unknown',
       animal_kind: item.animal_kind || '未知種類',
@@ -181,10 +180,19 @@ const DataScreen = () => {
       album_file: item.album_file || null
     };
     
+    // 檢查動物是否已經在收藏中
+    const isInFavorites = favorites.some(fav => fav.animal_id === item.animal_id);
+    
     return (
       <TouchableOpacity 
         style={styles.animalCard}
-        onPress={() => router.push(`/item/${item.animal_id}`)}
+        
+        onPress={() => {
+          const animalId = String(item.animal_id);
+          console.log("正在跳轉到動物ID:", item.animal_id);
+          router.push(`/item/${item.animal_id}`)}
+        }
+          
       >
         <View style={styles.animalInfo}>
           {safeItem.album_file ? (
@@ -202,30 +210,42 @@ const DataScreen = () => {
           )}
           <View style={styles.animalDetails}>
             <Text style={styles.animalName}>{safeItem.animal_kind} - {safeItem.animal_Variety}</Text>
-            <Text>地區: {safeItem.animal_place ? safeItem.animal_place.substring(0, 3) : '未知'}</Text>
-            <Text>性別: {safeItem.animal_sex === 'M' ? '公' : safeItem.animal_sex === 'F' ? '母' : '未知'}</Text>
-            <Text>顏色: {safeItem.animal_colour}</Text>
-            <Text>體型: {safeItem.animal_bodytype}</Text>
+            <Text style={styles.animalItem}>地區: {safeItem.animal_place ? safeItem.animal_place.substring(0, 3) : '未知'}</Text>
+            <Text style={styles.animalItem}>性別: {safeItem.animal_sex === 'M' ? '公' : safeItem.animal_sex === 'F' ? '母' : '未知'}</Text>
+            <Text style={styles.animalItem}>顏色: {safeItem.animal_colour}</Text>
+            <Text style={styles.animalItem}>體型: {safeItem.animal_bodytype}</Text>
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={styles.favoriteButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              alert('收藏功能暫時關閉');
-            }}
-          >
-            <Ionicons name="heart-outline" size={24} color="red" />
-            <Text style={styles.favoriteButtonText}>收藏</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.detailButton}
-            onPress={() => router.push(`/item/${item.animal_id}`)}
-          >
-            <Ionicons name="information-circle-outline" size={24} color="#4a80f5" />
-            <Text style={styles.detailButtonText}>詳細資料</Text>
-          </TouchableOpacity>
+        <TouchableOpacity 
+  style={styles.favoriteButton}
+  onPress={(e) => {
+    e.stopPropagation();
+    if (isInFavorites) {
+      removeFromFavorites(item);
+    } else {
+      addToFavorites(item);
+    }
+  }}
+>
+  <FontAwesome 
+    name={isInFavorites ? "heart" : "heart-o"} 
+    size={24} 
+    color="red" 
+  />
+  <Text style={styles.favoriteButtonText}>
+    {isInFavorites ? '取消收藏' : '收藏'}
+  </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.detailButton}
+          onPress={() => {
+            console.log("正在從詳細資料按鈕跳轉到動物ID:", item.animal_id);
+            router.push(`/item/${item.animal_id}`)}}
+        >
+          <FontAwesome name="info-circle" size={24} color="gray" />
+          <Text style={styles.detailButtonText}>詳細資料</Text>
+        </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
@@ -249,7 +269,7 @@ const DataScreen = () => {
               : '點擊設定篩選條件'}
           </Text>
         </View>
-        <Ionicons name="filter" size={24} color="#4a80f5" />
+        <FontAwesome name="filter" size={24} color="#4a80f5" />
       </TouchableOpacity>
     );
   };
@@ -267,8 +287,8 @@ const DataScreen = () => {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>篩選條件</Text>
             <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-              <Ionicons name="close" size={24} color="#333" />
-            </TouchableOpacity>
+  <FontAwesome name="close" size={24} color="#333" />
+</TouchableOpacity>
           </View>
           
           <ScrollView style={styles.modalContent}>
@@ -278,18 +298,30 @@ const DataScreen = () => {
             <Text style={styles.filterLabel}>地區</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterOptions}>
               <TouchableOpacity 
-                style={[styles.filterOption, tempFilters.area === '' && styles.filterOptionSelected]}
+                style={[
+                  styles.filterOption, 
+                  tempFilters.area === '' && styles.filterOptionSelected
+                ]}
                 onPress={() => setTempFilters({...tempFilters, area: ''})}
               >
-                <Text style={[styles.filterOptionText, tempFilters.area === '' && styles.filterOptionTextSelected]}>全部</Text>
+                <Text style={[
+                  styles.filterOptionText, 
+                  tempFilters.area === '' && styles.filterOptionTextSelected
+                ]}>全部</Text>
               </TouchableOpacity>
               {areas.map((area, index) => (
                 <TouchableOpacity 
                   key={index}
-                  style={[styles.filterOption, tempFilters.area === area && styles.filterOptionSelected]}
+                  style={[
+                    styles.filterOption, 
+                    tempFilters.area === area && styles.filterOptionSelected
+                  ]}
                   onPress={() => setTempFilters({...tempFilters, area: area})}
                 >
-                  <Text style={[styles.filterOptionText, tempFilters.area === area && styles.filterOptionTextSelected]}>{area}</Text>
+                  <Text style={[
+                    styles.filterOptionText, 
+                    tempFilters.area === area && styles.filterOptionTextSelected
+                  ]}>{area}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -298,18 +330,30 @@ const DataScreen = () => {
             <Text style={styles.filterLabel}>種類</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterOptions}>
               <TouchableOpacity 
-                style={[styles.filterOption, tempFilters.kind === '' && styles.filterOptionSelected]}
+                style={[
+                  styles.filterOption, 
+                  tempFilters.kind === '' && styles.filterOptionSelected
+                ]}
                 onPress={() => setTempFilters({...tempFilters, kind: ''})}
               >
-                <Text style={[styles.filterOptionText, tempFilters.kind === '' && styles.filterOptionTextSelected]}>全部</Text>
+                <Text style={[
+                  styles.filterOptionText, 
+                  tempFilters.kind === '' && styles.filterOptionTextSelected
+                ]}>全部</Text>
               </TouchableOpacity>
               {kinds.map((kind, index) => (
                 <TouchableOpacity 
                   key={index}
-                  style={[styles.filterOption, tempFilters.kind === kind && styles.filterOptionSelected]}
+                  style={[
+                    styles.filterOption, 
+                    tempFilters.kind === kind && styles.filterOptionSelected
+                  ]}
                   onPress={() => setTempFilters({...tempFilters, kind: kind})}
                 >
-                  <Text style={[styles.filterOptionText, tempFilters.kind === kind && styles.filterOptionTextSelected]}>{kind}</Text>
+                  <Text style={[
+                    styles.filterOptionText, 
+                    tempFilters.kind === kind && styles.filterOptionTextSelected
+                  ]}>{kind}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -318,28 +362,52 @@ const DataScreen = () => {
             <Text style={styles.filterLabel}>性別</Text>
             <View style={styles.filterOptionsRow}>
               <TouchableOpacity 
-                style={[styles.filterOption, tempFilters.sex === '' && styles.filterOptionSelected]}
+                style={[
+                  styles.filterOption, 
+                  tempFilters.sex === '' && styles.filterOptionSelected
+                ]}
                 onPress={() => setTempFilters({...tempFilters, sex: ''})}
               >
-                <Text style={[styles.filterOptionText, tempFilters.sex === '' && styles.filterOptionTextSelected]}>全部</Text>
+                <Text style={[
+                  styles.filterOptionText, 
+                  tempFilters.sex === '' && styles.filterOptionTextSelected
+                ]}>全部</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.filterOption, tempFilters.sex === 'M' && styles.filterOptionSelected]}
+                style={[
+                  styles.filterOption, 
+                  tempFilters.sex === 'M' && styles.filterOptionSelected
+                ]}
                 onPress={() => setTempFilters({...tempFilters, sex: 'M'})}
               >
-                <Text style={[styles.filterOptionText, tempFilters.sex === 'M' && styles.filterOptionTextSelected]}>公</Text>
+                <Text style={[
+                  styles.filterOptionText, 
+                  tempFilters.sex === 'M' && styles.filterOptionTextSelected
+                ]}>公</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.filterOption, tempFilters.sex === 'F' && styles.filterOptionSelected]}
+                style={[
+                  styles.filterOption, 
+                  tempFilters.sex === 'F' && styles.filterOptionSelected
+                ]}
                 onPress={() => setTempFilters({...tempFilters, sex: 'F'})}
               >
-                <Text style={[styles.filterOptionText, tempFilters.sex === 'F' && styles.filterOptionTextSelected]}>母</Text>
+                <Text style={[
+                  styles.filterOptionText, 
+                  tempFilters.sex === 'F' && styles.filterOptionTextSelected
+                ]}>母</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.filterOption, tempFilters.sex === 'N' && styles.filterOptionSelected]}
+                style={[
+                  styles.filterOption, 
+                  tempFilters.sex === 'N' && styles.filterOptionSelected
+                ]}
                 onPress={() => setTempFilters({...tempFilters, sex: 'N'})}
               >
-                <Text style={[styles.filterOptionText, tempFilters.sex === 'N' && styles.filterOptionTextSelected]}>未知</Text>
+                <Text style={[
+                  styles.filterOptionText, 
+                  tempFilters.sex === 'N' && styles.filterOptionTextSelected
+                ]}>未知</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -424,6 +492,7 @@ function createStyles(theme, colorScheme) {
     filterTitle: {
       fontSize: 18,
       fontWeight: 'bold',
+      color: theme.text,
     },
     filterSummary: {
       color: theme.text,
@@ -450,6 +519,7 @@ function createStyles(theme, colorScheme) {
     modalContainer: {
       flex: 1,
       backgroundColor: theme.background,
+      color: theme.text,
     },
     modalHeader: {
       flexDirection: 'row',
@@ -458,39 +528,49 @@ function createStyles(theme, colorScheme) {
       padding: 15,
       borderBottomWidth: 1,
       borderBottomColor: theme.border,
+      color: theme.text,
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: 'bold',
+      color: theme.text,
     },
     modalContent: {
       flex: 1,
       padding: 15,
+      color: theme.text,
     },
     modalFooter: {
       flexDirection: 'row',
       padding: 15,
       borderTopWidth: 1,
       borderTopColor: theme.border,
+      color: theme.text,
     },
     resetButton: {
       flex: 1,
-      backgroundColor: theme.button,
+      backgroundColor: colorScheme === 'dark' ? "black" : "white",
       borderRadius: 5,
       padding: 15,
       alignItems: 'center',
       marginRight: 10,
+      borderColor:colorScheme === 'dark' ? "white" : "black",
+      width:100,
+      borderWidth:1
     },
     resetButtonText: {
       color: theme.text,
       fontWeight: 'bold',
     },
     confirmButton: {
-      flex: 2,
-      backgroundColor: theme.button,
+      flex: 1,
+      backgroundColor: colorScheme === 'dark' ? "black" : "white",
       borderRadius: 5,
       padding: 15,
       alignItems: 'center',
+      borderColor:colorScheme === 'dark' ? "white" : "black",
+      borderWidth:1,
+      width:100,
     },
     confirmButtonText: {
       color: theme.text,
@@ -501,6 +581,7 @@ function createStyles(theme, colorScheme) {
       marginTop: 15,
       marginBottom: 5,
       fontWeight: 'bold',
+      color: theme.text,
     },
     filterOptions: {
       flexDirection: 'row',
@@ -518,15 +599,19 @@ function createStyles(theme, colorScheme) {
       borderRadius: 20,
       marginRight: 8,
       marginBottom: 8,
+      borderWidth: 1,
+      borderColor: theme.border,
     },
     filterOptionSelected: {
       backgroundColor: theme.background,
+      borderColor: colorScheme === 'dark' ? "skyblue" : "orange",
     },
     filterOptionText: {
       color: theme.text,
     },
     filterOptionTextSelected: {
-      color: theme.text,
+      color: colorScheme === 'dark' ? "skyblue" : "orange",
+      fontWeight: 'bold',
     },
     dropdownContainer: {
       paddingVertical: 5,
@@ -543,6 +628,7 @@ function createStyles(theme, colorScheme) {
     dropdownText: {
       fontSize: 16,
       paddingVertical: 8,
+      color: theme.text,
     },
     dropdownList: {
       width: 300,
@@ -561,7 +647,7 @@ function createStyles(theme, colorScheme) {
       padding: 15,
       marginBottom: 15,
       borderRadius: 10,
-      shadowColor: theme.shaodw,
+      shadowColor: colorScheme === 'dark' ? "white" : "black",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
@@ -570,28 +656,39 @@ function createStyles(theme, colorScheme) {
     animalInfo: {
       flexDirection: 'row',
     },
+    animalItem:{
+      color:theme.text,
+      marginBottom:5,
+    },
     animalImage: {
-      width: 100,
-      height: 100,
+      width: 120,
+      height: 120,
       borderRadius: 10,
-      marginRight: 15,
+      alignItems: 'center',
+      marginLeft: 20,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
     },
     noImage: {
       width: 100,
       height: 100,
       borderRadius: 10,
-      marginRight: 15,
+      marginLeft: 30,
       backgroundColor: theme.background,
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       alignItems: 'center',
     },
     animalDetails: {
       flex: 1,
+      color:theme.text,
+      justifyContent:'center',
+      marginLeft: 50,
     },
     animalName: {
       fontSize: 18,
       fontWeight: 'bold',
       marginBottom: 5,
+      color:theme.text,
     },
     buttonContainer: {
       flexDirection: 'row',
@@ -607,6 +704,8 @@ function createStyles(theme, colorScheme) {
       borderRadius: 5,
       flex: 1,
       marginRight: 5,
+      borderColor:colorScheme === 'dark' ? "white" : "black",
+      borderWidth:1
     },
     detailButton: {
       flexDirection: 'row',
@@ -617,14 +716,16 @@ function createStyles(theme, colorScheme) {
       borderRadius: 5,
       flex: 1,
       marginLeft: 5,
+      borderColor:colorScheme === 'dark' ? "white" : "black",
+      borderWidth:1
     },
     detailButtonText: {
       marginLeft: 5,
-      color: colorScheme === 'dark' ? "black" : "white",
+      color: colorScheme === 'dark' ? "white" : "black",
     },
     favoriteButtonText: {
       marginLeft: 5,
-      color: colorScheme === 'dark' ? "black" : "white",
+      color: colorScheme === 'dark' ? "white" : "black",
     },
   });
 }
