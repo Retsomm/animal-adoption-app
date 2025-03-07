@@ -1,5 +1,5 @@
 // app/data.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { 
   View, 
   Text, 
@@ -13,8 +13,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ThemeContext } from '@/contexts/ThemeContext';
 
 const DataScreen = () => {
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [animals, setAnimals] = useState([]);
@@ -38,7 +41,7 @@ const DataScreen = () => {
   // 篩選視窗控制
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [tempFilters, setTempFilters] = useState({...filters});
-  
+  const styles = createStyles(theme, colorScheme);
   // 直接從API獲取數據，不再使用本地代理
   const fetchData = async () => {
     try {
@@ -205,7 +208,6 @@ const DataScreen = () => {
             <Text>體型: {safeItem.animal_bodytype}</Text>
           </View>
         </View>
-        {/* 簡化按鈕部分，暫時移除addToFavorites調用 */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={styles.favoriteButton}
@@ -398,232 +400,232 @@ const DataScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1, // 確保 SafeAreaView 撐滿全屏
-  },
-  dataContainer: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  filterCollapsible: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  filterCollapsibleContent: {
-    flex: 1,
-  },
-  filterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  filterSummary: {
-    color: '#666',
-    marginTop: 4,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  modalContent: {
-    flex: 1,
-    padding: 15,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  resetButton: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-    padding: 15,
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  resetButtonText: {
-    color: '#666',
-    fontWeight: 'bold',
-  },
-  confirmButton: {
-    flex: 2,
-    backgroundColor: '#4a80f5',
-    borderRadius: 5,
-    padding: 15,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  filterLabel: {
-    fontSize: 16,
-    marginTop: 15,
-    marginBottom: 5,
-    fontWeight: 'bold',
-  },
-  filterOptions: {
-    flexDirection: 'row',
-    marginBottom: 15,
-  },
-  filterOptionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 15,
-  },
-  filterOption: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  filterOptionSelected: {
-    backgroundColor: '#4a80f5',
-  },
-  filterOptionText: {
-    color: '#333',
-  },
-  filterOptionTextSelected: {
-    color: '#fff',
-  },
-  dropdownContainer: {
-    paddingVertical: 5,
-  },
-  dropdown: {
-    width: '100%',
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  dropdownText: {
-    fontSize: 16,
-    paddingVertical: 8,
-  },
-  dropdownList: {
-    width: 300,
-    marginTop: 8,
-    borderRadius: 5,
-  },
-  dropdownItemText: {
-    fontSize: 16,
-  },
-  animalList: {
-    flex: 1,
-    padding: 10,
-  },
-  animalCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  animalInfo: {
-    flexDirection: 'row',
-  },
-  animalImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: 15,
-  },
-  noImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: 15,
-    backgroundColor: '#ddd',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  animalDetails: {
-    flex: 1,
-  },
-  animalName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-    justifyContent: 'space-between',
-  },
-  favoriteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
-    padding: 8,
-    borderRadius: 5,
-    flex: 1,
-    marginRight: 5,
-  },
-  detailButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#e6f0ff',
-    padding: 8,
-    borderRadius: 5,
-    flex: 1,
-    marginLeft: 5,
-  },
-  detailButtonText: {
-    marginLeft: 5,
-    color: '#4a80f5',
-  },
-  favoriteButtonText: {
-    marginLeft: 5,
-    color: '#333',
-  },
-});
-
+function createStyles(theme, colorScheme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1, // 確保 SafeAreaView 撐滿全屏
+    },
+    dataContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    filterCollapsible: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 15,
+      backgroundColor: theme.background,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+    filterCollapsibleContent: {
+      flex: 1,
+    },
+    filterTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    filterSummary: {
+      color: theme.text,
+      marginTop: 4,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 18,
+      color: theme.text,
+      textAlign: 'center',
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: 'center',
+    },
+    emptyText: {
+      fontSize: 16,
+      color: theme.text,
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    modalContent: {
+      flex: 1,
+      padding: 15,
+    },
+    modalFooter: {
+      flexDirection: 'row',
+      padding: 15,
+      borderTopWidth: 1,
+      borderTopColor: theme.border,
+    },
+    resetButton: {
+      flex: 1,
+      backgroundColor: theme.button,
+      borderRadius: 5,
+      padding: 15,
+      alignItems: 'center',
+      marginRight: 10,
+    },
+    resetButtonText: {
+      color: theme.text,
+      fontWeight: 'bold',
+    },
+    confirmButton: {
+      flex: 2,
+      backgroundColor: theme.button,
+      borderRadius: 5,
+      padding: 15,
+      alignItems: 'center',
+    },
+    confirmButtonText: {
+      color: theme.text,
+      fontWeight: 'bold',
+    },
+    filterLabel: {
+      fontSize: 16,
+      marginTop: 15,
+      marginBottom: 5,
+      fontWeight: 'bold',
+    },
+    filterOptions: {
+      flexDirection: 'row',
+      marginBottom: 15,
+    },
+    filterOptionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 15,
+    },
+    filterOption: {
+      backgroundColor: theme.background,
+      paddingHorizontal: 15,
+      paddingVertical: 8,
+      borderRadius: 20,
+      marginRight: 8,
+      marginBottom: 8,
+    },
+    filterOptionSelected: {
+      backgroundColor: theme.background,
+    },
+    filterOptionText: {
+      color: theme.text,
+    },
+    filterOptionTextSelected: {
+      color: theme.text,
+    },
+    dropdownContainer: {
+      paddingVertical: 5,
+    },
+    dropdown: {
+      width: '100%',
+      height: 40,
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      justifyContent: 'center',
+    },
+    dropdownText: {
+      fontSize: 16,
+      paddingVertical: 8,
+    },
+    dropdownList: {
+      width: 300,
+      marginTop: 8,
+      borderRadius: 5,
+    },
+    dropdownItemText: {
+      fontSize: 16,
+    },
+    animalList: {
+      flex: 1,
+      padding: 10,
+    },
+    animalCard: {
+      backgroundColor: theme.background,
+      padding: 15,
+      marginBottom: 15,
+      borderRadius: 10,
+      shadowColor: theme.shaodw,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    animalInfo: {
+      flexDirection: 'row',
+    },
+    animalImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 10,
+      marginRight: 15,
+    },
+    noImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 10,
+      marginRight: 15,
+      backgroundColor: theme.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    animalDetails: {
+      flex: 1,
+    },
+    animalName: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 5,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      marginTop: 10,
+      justifyContent: 'space-between',
+    },
+    favoriteButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.button,
+      padding: 8,
+      borderRadius: 5,
+      flex: 1,
+      marginRight: 5,
+    },
+    detailButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.button,
+      padding: 8,
+      borderRadius: 5,
+      flex: 1,
+      marginLeft: 5,
+    },
+    detailButtonText: {
+      marginLeft: 5,
+      color: colorScheme === 'dark' ? "black" : "white",
+    },
+    favoriteButtonText: {
+      marginLeft: 5,
+      color: colorScheme === 'dark' ? "black" : "white",
+    },
+  });
+}
 export default DataScreen;

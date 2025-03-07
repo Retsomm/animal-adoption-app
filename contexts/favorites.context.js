@@ -1,4 +1,3 @@
-// contexts/favorites.context.js
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';

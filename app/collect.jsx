@@ -4,7 +4,6 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import { useFavorites } from '../contexts/favorites.context.js';
 import { useRouter } from 'expo-router';
-
 const CollectScreen = () => {
   const router = useRouter();
   const { favorites, removeFromFavorites } = useFavorites();

@@ -1,5 +1,5 @@
 // app/item/[id].jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext  } from 'react';
 import { 
   View, Text, StyleSheet, Image, ScrollView, 
   ActivityIndicator, TouchableOpacity, Alert
@@ -7,7 +7,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFavorites } from '../../contexts/favorites.context.js';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemeContext } from '@/contexts/ThemeContext';
 
 const AnimalDetailScreen = () => {
   const params = useLocalSearchParams();
@@ -18,6 +18,10 @@ const AnimalDetailScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isMounted = useRef(true);
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  
+  // 先建立樣式
+  const styles = createStyles(theme, colorScheme);
   
   // 使用 useMemo 來計算是否在收藏中，避免不必要的重新計算
   const isInFavorites = favorites ? favorites.some(fav => fav.animal_id === id) : false;
@@ -129,7 +133,7 @@ const AnimalDetailScreen = () => {
 
   // 處理可能缺失的資料
   const getDefaultIfEmpty = (value) => value || "未提供";
-
+  
   return (
       <ScrollView style={styles.container}>
         <View style={styles.header}>
@@ -284,159 +288,163 @@ const AnimalDetailScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#555',
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-  backButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-  },
-  backButtonText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  backButtonContainer: {
-    padding: 8,
-  },
-  favoriteButtonContainer: {
-    padding: 8,
-  },
-  imageContainer: {
-    height: 250,
-    width: '100%',
-    backgroundColor: '#e0e0e0',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  detailContainer: {
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: -20,
-  },
-  nameContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  animalName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-  },
-  badgeContainer: {
-    flexDirection: 'row',
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    marginLeft: 8,
-  },
-  badgeText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  section: {
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  infoItem: {
-    flex: 1,
-  },
-  fullInfoItem: {
-    marginBottom: 15,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 5,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#333',
-  },
-  timeItem: {
-    marginBottom: 12,
-  },
-  timeLabel: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 2,
-  },
-  timeValue: {
-    fontSize: 16,
-    color: '#333',
-  },
-  debugText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#ff6b6b',
-  },
-  debugInfo: {
-    padding: 5,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-    margin: 5,
-  },
-  // 其他樣式保持不變
-});
+function createStyles(theme, colorScheme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      marginTop: 10,
+      fontSize: 18,
+      color: theme.text,
+      textAlign: 'center',
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    errorText: {
+      fontSize: 18,
+      color: theme.text,
+      textAlign: 'center',
+      marginVertical: 20,
+    },
+    backButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      backgroundColor: theme.button,
+      borderRadius: 5,
+    },
+    backButtonText: {
+      color: colorScheme === 'dark' ? "black" : "white",
+      fontSize: 16,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 16,
+    },
+    backButtonContainer: {
+      padding: 8,
+    },
+    favoriteButtonContainer: {
+      padding: 8,
+    },
+    imageContainer: {
+      height: 250,
+      width: '100%',
+      backgroundColor: theme.background,
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    detailContainer: {
+      padding: 16,
+      backgroundColor: theme.background,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      marginTop: -20,
+    },
+    nameContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    animalName: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color:theme.text,
+      flex: 1,
+    },
+    badgeContainer: {
+      flexDirection: 'row',
+    },
+    badge: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 14,
+      marginLeft: 8,
+    },
+    badgeText: {
+      color: theme.text,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    section: {
+      marginBottom: 20,
+      backgroundColor: theme.background,
+      padding: 15,
+      borderRadius: 10,
+      shadowColor: theme.shaodw,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      marginTop: 10,
+      color: theme.text,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 10,
+    },
+    infoItem: {
+      flex: 1,
+    },
+    fullInfoItem: {
+      marginBottom: 15,
+    },
+    infoLabel: {
+      fontSize: 16,
+      color: theme.text,
+      marginBottom: 10,
+      fontWeight:800,
+    },
+    infoValue: {
+      fontSize: 16,
+      color: theme.text,
+    },
+    timeItem: {
+      marginBottom: 12,
+    },
+    timeLabel: {
+      fontSize: 16,
+      color: theme.text,
+      marginBottom: 10,
+      fontWeight:800,
+    },
+    timeValue: {
+      fontSize: 16,
+      color: theme.text,
+    },
+    debugText: {
+      marginTop: 10,
+      fontSize: 14,
+      color: theme.text,
+    },
+    debugInfo: {
+      padding: 5,
+      backgroundColor: theme.background,
+      borderRadius: 5,
+      margin: 5,
+    },
+  });
+}
 
 export default AnimalDetailScreen;
