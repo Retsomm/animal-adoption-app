@@ -15,6 +15,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ThemeContext } from '@/contexts/ThemeContext';
 import { useFavorites } from '../contexts/favorites.context.js';
+
+
+
 const DataScreen = () => {
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const { favorites, addToFavorites, removeFromFavorites } = useFavorites();

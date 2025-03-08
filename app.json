@@ -25,7 +25,22 @@
       }
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro",
+      "headers": {
+        "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+        "Cross-Origin-Embedder-Policy": "credentialless"
+      },
+      "cors": {
+        "allowedOrigins": [
+          "https://accounts.google.com",
+          "https://auth.expo.io",
+          "http://localhost",
+          "http://localhost:8081",
+          "http://localhost:19006",
+          "https://animal-adoption-82e5f.firebaseapp.com"
+        ]
+      }
     },
     "plugins": [
       "expo-router"

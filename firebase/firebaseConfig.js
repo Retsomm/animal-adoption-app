@@ -1,11 +1,8 @@
-// Import the functions you need from the SDKs you need
+// firebase/firebaseConfig.js
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth } from 'firebase/auth';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase 配置
 const firebaseConfig = {
   apiKey: "AIzaSyAhhmuWcbYzpnAgblBS9BZkz_RI-4urRHs",
   authDomain: "animal-adoption-82e5f.firebaseapp.com",
@@ -16,6 +13,8 @@ const firebaseConfig = {
   measurementId: "G-Q461RJQ2E6"
 };
 
-// Initialize Firebase
+// 初始化 Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const auth = getAuth(app);
+
+export { auth, app, firebaseConfig };

@@ -1,115 +1,63 @@
-// app/profile.jsx
-import React,{ useContext } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState, useContext } from "react";
+import { View, Text, Button, Image, StyleSheet } from "react-native";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from '@/contexts/ThemeContext';
 
 const ProfileScreen = () => {
+  const auth = getAuth();
+  const navigation = useNavigation();
+  const [user, setUser] = useState(null);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const styles = createStyles(theme, colorScheme);
-  // 假會員資料
-  const memberInfo = {
-    name: '王小明',
-    email: 'wangxiaoming@example.com',
-    phone: '0912-345-678',
-  };
-  
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.profileImageContainer}>
-          <Image 
-            source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} 
-            style={styles.profileImage} 
-          />
-        </View>
-        <Text style={styles.name}>{memberInfo.name}</Text>
-      </View>
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (!currentUser) {
+        // 使用 navigate 替代 replace
+        navigation.navigate("login");
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>個人資料</Text>
-        
-        <View style={styles.infoItem}>
-          <Ionicons name="mail-outline" size={22} color="#666" />
-          <Text style={styles.infoText}>{memberInfo.email}</Text>
-        </View>
-        
-        <View style={styles.infoItem}>
-          <Ionicons name="call-outline" size={22} color="#666" />
-          <Text style={styles.infoText}>{memberInfo.phone}</Text>
-        </View>
-      </View>
-        <View style={styles.logOut}>
-          <Ionicons name="log-out-outline" size={22} color="#666" />
-          <Text style={styles.settingText}>登出</Text>
-        </View>
-    </ScrollView>
+  const handleLogout = async () => {
+    await signOut(auth);
+    // 使用 navigate 替代 replace
+    navigation.navigate("login");
+  };
+
+  if (!user) return <Text>載入中...</Text>;
+
+  return (
+    <View style={styles.profileContainer} >
+      <Text style={styles.profileText}>個人資料</Text>
+      {user.photoURL && <Image source={{ uri: user.photoURL }} style={{ width: 100, height: 100, borderRadius: 50, marginBottom:20}} />}
+      <Text style={styles.profileText}>姓名: {user.displayName}</Text>
+      <Text style={styles.profileText}>Email: {user.email}</Text>
+      <Button style={styles.profileButton} title="登出" onPress={handleLogout} />
+    </View>
   );
 };
+
+export default ProfileScreen;
+
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
-    container: {
-      flex: 1,
+    profileContainer:{
+      flex: 1, 
+      justifyContent: "center", 
+      alignItems: "center",
       backgroundColor: theme.background,
-    },
-    header: {
-      alignItems: 'center',
-      marginTop: 80,
-      backgroundColor: theme.background,
-    },
-    profileImageContainer: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      overflow: 'hidden',
-      marginBottom: 15,
-    },
-    profileImage: {
-      width: '100%',
-      height: '100%',
-    },
-    name: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 5,
-    },
-    infoSection: {
-      backgroundColor: theme.background,
-      marginTop:30,
-      margin: 15,
-      paddingHorizontal: 20,
-      paddingVertical: 15,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      margin: 15,
       color: theme.text,
-      
     },
-    infoItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      margin: 15,
-    },
-    infoText: {
-      fontSize: 16,
+    profileText:{
       color: theme.text,
-      marginLeft: 10,
+      marginBottom:20,
     },
-    logOut:{
-      flex: 1,
-      flexDirection: 'row',
-      marginTop:100,
-      alignItems: 'center',
-      justifyContent:'center',
-    },
-    settingText: {
-      fontSize: 16,
-      color: theme.text,
-      marginLeft: 10,
+    profileButton:{
+      backgroundColor: colorScheme === 'dark' ? "white" : "black",
     }
-    
+
   });
 }
-export default ProfileScreen;

@@ -1,7 +1,6 @@
 // app/_layout.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 import { FavoritesProvider } from '../contexts/favorites.context.js';
 import { useFonts } from 'expo-font';
@@ -10,6 +9,7 @@ import { StyleSheet, View } from 'react-native';
 import { ThemeProvider, ThemeContext } from "@/contexts/ThemeContext.js";
 import { useContext } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 SplashScreen.preventAutoHideAsync(); // 確保載入畫面不會提前消失
 
@@ -36,8 +36,22 @@ export default function AppLayout() {
 }
 
 function AppContent() {
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme, theme } = useContext(ThemeContext);
   const styles = createStyles(theme, colorScheme);
+  const [user, setUser] = useState(null);
+  const [userChecked, setUserChecked] = useState(false);
+
+  // 監聽使用者登入狀態
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setUserChecked(true);
+      console.log('使用者狀態變更:', currentUser ? '已登入' : '未登入');
+    });
+    
+    return () => unsubscribe();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -55,9 +69,12 @@ function AppContent() {
                 iconName = focused ? 'heart' : 'heart-o';
               } else if (route.name === 'profile') {
                 iconName = focused ? 'user' : 'user-o';
+              } else if (route.name === 'login') {
+                iconName = focused ? 'user' : 'user-o';
+              } else if (route.name === 'user') {
+                iconName = focused ? 'user' : 'user-o';
               }
             
-              // 使用 View 包裹圖標，提供更好的間距控制
               return (
                 <View style={styles.tabIconContainer}>
                   <FontAwesome name={iconName} size={size} color={color} />
@@ -71,6 +88,19 @@ function AppContent() {
             tabBarLabelStyle: styles.tabBarLabel,
           })}
         >
+          <Tabs.Screen
+            name="item"
+            options={{
+              tabBarButton: () => null,
+              headerShown: false,
+              tabBarStyle: { 
+                display: 'none',
+                height:0,
+                position:'absolute',
+                bottom: -1000, 
+               }
+            }}
+          />
           <Tabs.Screen
             name="index"
             options={{
@@ -92,19 +122,29 @@ function AppContent() {
               headerShown: false,
             }}
           />
+          
+          {/* 第五個位置 - 使用者標籤 */}
+          <Tabs.Screen
+            name="user"
+            options={{
+              title: userChecked ? (user ? '會員' : '登入') : '使用者',
+              headerShown: false,
+            }}
+          />
+          
+          {/* 隱藏的實際路由頁面 */}
           <Tabs.Screen
             name="profile"
             options={{
-              title: '會員',
+              tabBarButton: () => null,
               headerShown: false,
             }}
           />
           <Tabs.Screen
-            name="item"
+            name="login"
             options={{
               tabBarButton: () => null,
               headerShown: false,
-              tabBarStyle: { display: 'none' }
             }}
           />
         </Tabs>
@@ -123,9 +163,8 @@ function createStyles(theme, colorScheme) {
       paddingBottom: 5,
       paddingTop: 5,
       paddingHorizontal: 20,
-      paddingLeft: 65,
-      backgroundColor: theme.background,
-      color: theme.text,
+      backgroundColor: theme?.background || '#ffffff',
+      color: theme?.text || '#000000',
     },
     tabIconContainer: {
       alignItems: 'center',
@@ -134,6 +173,11 @@ function createStyles(theme, colorScheme) {
     },
     tabBarLabel: {
       fontSize: 12,
+    },
+    tabBarItem: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }
