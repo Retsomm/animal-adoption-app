@@ -15,8 +15,8 @@
             "value": "*"
           },
           {
-            "key": "Cache-Control",
-            "value": "max-age=2592000"
+            "key": "Content-Type",
+            "value": "font/ttf"
           }
         ]
       },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator,ScrollView } from 'react-native';
 import { Link, Stack } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { ThemeContext } from '@/contexts/ThemeContext';
@@ -28,6 +28,7 @@ export default function HomeScreen() {
   }
   
   return (
+    <ScrollView>
       <View style={styles.container}>
             <Stack.Screen options={{ title: '首頁' }} />
             
@@ -37,7 +38,7 @@ export default function HomeScreen() {
                 style={styles.themeToggle}
                 onPress={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')}>
                 <FontAwesome 
-                  name={colorScheme === 'dark' ? 'moon-o' : 'sun-o'} 
+                  name={colorScheme === 'dark' ? "moon-o" : "sun-o"} 
                   size={24} 
                   color={theme.icon} 
                 />
@@ -65,26 +66,27 @@ export default function HomeScreen() {
             <View style={styles.buttonContainer}>
               <Link href="/data" asChild>
               <TouchableOpacity style={styles.button}>
-                <FontAwesome name="search" size={24} style={styles.buttonIcon} />
+              <FontAwesome name="search" size={24} style={styles.buttonIcon} />
                 <Text style={styles.buttonText}>開始瀏覽動物資料</Text>
               </TouchableOpacity>
               </Link>
             </View>
             <View style={styles.featureContainer}>
               <View style={styles.featureItem}>
-                <FontAwesome name="filter" size={24} color="#4a80f5" />
+              <FontAwesome name="filter" size={24} color="#4a80f5" />
                 <Text style={styles.featureText}>多種篩選條件</Text>
               </View>
               <View style={styles.featureItem}>
-                <FontAwesome name="heart" size={24} color="#4a80f5" />
+              <FontAwesome name="heart" size={24} color="#4a80f5" />
                 <Text style={styles.featureText}>收藏喜愛動物</Text>
               </View>
               <View style={styles.featureItem}>
-                <FontAwesome name="info-circle" size={24} color="#4a80f5" />
+              <FontAwesome name="info-circle" size={24} color="#4a80f5" />
                 <Text style={styles.featureText}>詳細資訊查詢</Text>
               </View>
             </View>
       </View>
+    </ScrollView>
   );
 }
 

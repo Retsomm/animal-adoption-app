@@ -1,7 +1,6 @@
-// app/collect.jsx
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons'; 
+import { FontAwesome } from '@expo/vector-icons';
 import { useFavorites } from '../contexts/favorites.context.js';
 import { useRouter } from 'expo-router';
 import { ThemeContext } from '@/contexts/ThemeContext';
@@ -46,7 +45,7 @@ const CollectScreen = () => {
     removeFromFavorites(item);
   }}
 >
-  <FontAwesome name="heart" size={24} color="red" />
+<FontAwesome name="heart" size={24} color="red" />
   <Text style={styles.favoriteButtonText}>取消收藏</Text>
         </TouchableOpacity>
         <TouchableOpacity 

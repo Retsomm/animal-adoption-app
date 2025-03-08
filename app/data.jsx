@@ -231,11 +231,7 @@ const DataScreen = () => {
     }
   }}
 >
-  <FontAwesome 
-    name={isInFavorites ? "heart" : "heart-o"} 
-    size={24} 
-    color="red" 
-  />
+<FontAwesome name={isInFavorites ? "heart" : "heart-o"} size={24} color="red" />
   <Text style={styles.favoriteButtonText}>
     {isInFavorites ? '取消收藏' : '收藏'}
   </Text>
@@ -290,7 +286,7 @@ const DataScreen = () => {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>篩選條件</Text>
             <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-  <FontAwesome name="close" size={24} color="#333" />
+            <FontAwesome name="times" size={24} color="#333" />
 </TouchableOpacity>
           </View>
           

@@ -1,33 +1,37 @@
 import React, { useEffect, useState, useContext } from "react";
 import { View, Text, Button, Image, StyleSheet } from "react-native";
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
-import { useNavigation } from "@react-navigation/native";
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { router } from "expo-router"; // 使用 expo-router 替代 useNavigation
 import { ThemeContext } from '@/contexts/ThemeContext';
+import { auth } from "../firebase/firebaseConfig"; // 直接從設定文件引入已初始化的 auth
 
 const ProfileScreen = () => {
-  const auth = getAuth();
-  const navigation = useNavigation();
   const [user, setUser] = useState(null);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const styles = createStyles(theme, colorScheme);
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
-        // 使用 navigate 替代 replace
-        navigation.navigate("login");
+        // 使用 router.replace 導航到登入頁面
+        router.replace("/login");
       }
     });
     return () => unsubscribe();
   }, []);
 
   const handleLogout = async () => {
-    await signOut(auth);
-    // 使用 navigate 替代 replace
-    navigation.navigate("login");
+    try {
+      await signOut(auth);
+      // 使用 router.replace 導航到登入頁面
+      router.replace("/login");
+    } catch (error) {
+      console.error("登出錯誤:", error);
+    }
   };
 
-  if (!user) return <Text>載入中...</Text>;
+  if (!user) return <Text style={styles.profileText}>載入中...</Text>;
 
   return (
     <View style={styles.profileContainer} >
@@ -35,12 +39,13 @@ const ProfileScreen = () => {
       {user.photoURL && <Image source={{ uri: user.photoURL }} style={{ width: 100, height: 100, borderRadius: 50, marginBottom:20}} />}
       <Text style={styles.profileText}>姓名: {user.displayName}</Text>
       <Text style={styles.profileText}>Email: {user.email}</Text>
-      <Button style={styles.profileButton} title="登出" onPress={handleLogout} />
+      <Button 
+        title="登出" 
+        onPress={handleLogout} 
+      />
     </View>
   );
 };
-
-export default ProfileScreen;
 
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
@@ -55,9 +60,7 @@ function createStyles(theme, colorScheme) {
       color: theme.text,
       marginBottom:20,
     },
-    profileButton:{
-      backgroundColor: colorScheme === 'dark' ? "white" : "black",
-    }
-
   });
 }
+
+export default ProfileScreen;

@@ -1,30 +1,37 @@
 import React, { useState, useContext } from "react";
 import { View, Button, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { router } from "expo-router"; // 使用 expo-router 的 router
-import { auth } from "../firebase/firebaseConfig";
+import { auth } from "../firebase/firebaseConfig"; // 直接從設定文件引入已初始化的 auth
 import { ThemeContext } from '@/contexts/ThemeContext';
+
 const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const styles = createStyles(theme, colorScheme);
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // 建立 Google 授權提供者
-      const provider = new GoogleAuthProvider();
-      
-      // 使用 Firebase 的 signInWithPopup 方法 (適用於網頁環境)
-      const result = await signInWithPopup(auth, provider);
-      
-      // 登入成功，使用 expo-router 進行導航
-      console.log("登入成功:", result.user.displayName);
-      
-      // 使用 expo-router 的方式進行導航
-      router.replace("/profile"); // 使用 router.replace 而非 navigation.navigate
+      // 確保在 Web 環境中
+      if (typeof window !== 'undefined') {
+        // 建立 Google 授權提供者
+        const provider = new GoogleAuthProvider();
+        
+        // 使用 Firebase 的 signInWithPopup 方法 (適用於網頁環境)
+        const result = await signInWithPopup(auth, provider);
+        
+        // 登入成功，使用 expo-router 進行導航
+        console.log("登入成功:", result.user.displayName);
+        
+        // 使用 expo-router 的方式進行導航
+        router.replace("/profile"); // 使用 router.replace 而非 navigation.navigate
+      } else {
+        throw new Error("目前環境不支援彈出式視窗登入");
+      }
     } catch (error) {
       console.error("登入失敗:", error);
       setError(`登入失敗: ${error.message}`);
@@ -58,7 +65,6 @@ const LoginScreen = () => {
     </View>
   );
 };
-
 
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
@@ -94,5 +100,5 @@ function createStyles(theme, colorScheme) {
     }
   });
 }
-export default LoginScreen;
 
+export default LoginScreen;
