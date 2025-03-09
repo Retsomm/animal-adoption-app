@@ -220,40 +220,44 @@ const DataScreen = () => {
           </View>
         </View>
         <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-  style={styles.favoriteButton}
-  onPress={(e) => {
-    e.stopPropagation();
-    if (isInFavorites) {
-      removeFromFavorites(item);
-    } else {
-      addToFavorites(item);
-    }
-  }}
->
-<FontAwesome name={isInFavorites ? "heart" : "heart-o"} size={24} color="red" />
-  <Text style={styles.favoriteButtonText}>
-    {isInFavorites ? '取消收藏' : '收藏'}
-  </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.detailButton}
-          onPress={() => {
-            console.log("正在從詳細資料按鈕跳轉到動物ID:", item.animal_id);
-            router.push(`/item/${item.animal_id}`)}}
-        >
-          <FontAwesome name="info-circle" size={24} color="gray" />
-          <Text style={styles.detailButtonText}>詳細資料</Text>
-        </TouchableOpacity>
+          <TouchableOpacity 
+            accessible={true}
+            accessibilityLabel="Do you like it?"
+            style={styles.favoriteButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              if (isInFavorites) {
+                removeFromFavorites(item);
+              } else {
+                addToFavorites(item);
+              }
+            }}
+          >
+          <FontAwesome name={isInFavorites ? "heart" : "heart-o"} size={24} color="red" />
+          <Text style={styles.favoriteButtonText}>
+          {isInFavorites ? '取消收藏' : '收藏'}
+        </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            accessible={true}
+            accessibilityLabel="Detail"
+            style={styles.detailButton}
+            onPress={() => {
+              console.log("正在從詳細資料按鈕跳轉到動物ID:", item.animal_id);
+              router.push(`/item/${item.animal_id}`)}}
+          >
+            <FontAwesome name="info-circle" size={24} color="gray" />
+            <Text style={styles.detailButtonText}>詳細資料</Text>
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
   };
-
-  // 簡化版篩選摺疊視窗
   const renderFilterCollapsible = () => {
     return (
       <TouchableOpacity 
+        accessible={true}
+        accessibilityLabel="Filter condictions"
         style={styles.filterCollapsible}
         onPress={() => {
           setTempFilters({...filters});
@@ -272,8 +276,6 @@ const DataScreen = () => {
       </TouchableOpacity>
     );
   };
-  
-  // 簡化的篩選條件選擇模態視窗
   const renderFilterModal = () => {
     return (
       <Modal
@@ -291,11 +293,10 @@ const DataScreen = () => {
           </View>
           
           <ScrollView style={styles.modalContent}>
-            <Text style={styles.filterLabel}>請點擊確認套用篩選</Text>
             
             {/* 區域篩選 */}
             <Text style={styles.filterLabel}>地區</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterOptions}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.filterOptions}>
               <TouchableOpacity 
                 style={[
                   styles.filterOption, 
@@ -413,6 +414,8 @@ const DataScreen = () => {
           
           <View style={styles.modalFooter}>
             <TouchableOpacity 
+              accessible={true}
+              accessibilityLabel="Reset condictions"
               style={styles.resetButton} 
               onPress={() => setTempFilters({
                 area: '',
@@ -426,6 +429,8 @@ const DataScreen = () => {
               <Text style={styles.resetButtonText}>重置</Text>
             </TouchableOpacity>
             <TouchableOpacity 
+              accessible={true}
+              accessibilityLabel="Ensure condictions"
               style={styles.confirmButton} 
               onPress={() => {
                 setFilters({...tempFilters});
@@ -646,10 +651,10 @@ function createStyles(theme, colorScheme) {
       padding: 15,
       marginBottom: 15,
       borderRadius: 10,
-      shadowColor: colorScheme === 'dark' ? "white" : "black",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
+      boxShadowColor: theme.shadow,
+      boxShadowOffset: { width: 0, height: 2 },
+      boxShadowOpacity: 0.1,
+      boxShadowRadius: 4,
       elevation: 2,
     },
     animalInfo: {

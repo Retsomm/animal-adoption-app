@@ -39,16 +39,20 @@ const CollectScreen = () => {
         </View>
         <View style={styles.buttonContainer}>
         <TouchableOpacity 
-  style={styles.removeButton}
-  onPress={(e) => {
-    e.stopPropagation();
-    removeFromFavorites(item);
-  }}
->
-<FontAwesome name="heart" size={24} color="red" />
-  <Text style={styles.favoriteButtonText}>取消收藏</Text>
+          accessible={true}
+          accessibilityLabel="Remove collected"
+          style={styles.removeButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            removeFromFavorites(item);
+          }}
+        >
+          <FontAwesome name="heart" size={24} color="red" />
+          <Text style={styles.favoriteButtonText}>取消收藏</Text>
         </TouchableOpacity>
         <TouchableOpacity 
+          accessible={true}
+          accessibilityLabel="Detail"
           style={styles.detailButton}
           onPress={() => router.push(`/item/${item.animal_id}`)}
         >
@@ -94,10 +98,10 @@ function createStyles(theme, colorScheme) {
     padding: 15,
     marginBottom: 15,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadowColor: theme.shadow,
+    boxShadowOffset: { width: 0, height: 2 },
+    boxShadowOpacity: 0.1,
+    boxShadowRadius: 4,
     elevation: 2,
     color: theme.text
   },

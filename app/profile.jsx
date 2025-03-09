@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { View, Text, Button, Image, StyleSheet } from "react-native";
+import { View, Text, Button, Image, StyleSheet,TouchableOpacity  } from "react-native";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { router } from "expo-router"; // 使用 expo-router 替代 useNavigation
 import { ThemeContext } from '@/contexts/ThemeContext';
@@ -37,12 +37,15 @@ const ProfileScreen = () => {
     <View style={styles.profileContainer} >
       <Text style={styles.profileText}>個人資料</Text>
       {user.photoURL && <Image source={{ uri: user.photoURL }} style={{ width: 100, height: 100, borderRadius: 50, marginBottom:20}} />}
-      <Text style={styles.profileText}>姓名: {user.displayName}</Text>
-      <Text style={styles.profileText}>Email: {user.email}</Text>
-      <Button 
-        title="登出" 
+      <Text style={styles.profileText}>姓名： {user.displayName}</Text>
+      <Text style={styles.profileText}>Email： {user.email}</Text>
+      <TouchableOpacity 
+        accessible={true}
+        accessibilityLabel="Logout"
         onPress={handleLogout} 
-      />
+        style={styles.button}>
+        <Text style={styles.buttonText}>登出</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -60,6 +63,19 @@ function createStyles(theme, colorScheme) {
       color: theme.text,
       marginBottom:20,
     },
+    button: {
+      backgroundColor: "#4285F4", // Google 藍色
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      borderRadius: 5,
+      width: "50%",
+      alignItems: "center"
+    },
+    buttonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold"
+    }
   });
 }
 

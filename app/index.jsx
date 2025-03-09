@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator,ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView, Platform } from 'react-native';
 import { Link, Stack } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { ThemeContext } from '@/contexts/ThemeContext';
+
 export default function HomeScreen() {
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   
   const [isLoading, setIsLoading] = useState(true);
   const styles = createStyles(theme, colorScheme);
+  
   // 模擬載入時間，然後顯示介面
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -35,6 +37,8 @@ export default function HomeScreen() {
             <View style={styles.header}>
               <Text style={styles.title}>動物領養平台
               <TouchableOpacity 
+                accessible={true}
+                accessibilityLabel="Switch mode"
                 style={styles.themeToggle}
                 onPress={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')}>
                 <FontAwesome 
@@ -65,8 +69,11 @@ export default function HomeScreen() {
             
             <View style={styles.buttonContainer}>
               <Link href="/data" asChild>
-              <TouchableOpacity style={styles.button}>
-              <FontAwesome name="search" size={24} style={styles.buttonIcon} />
+              <TouchableOpacity 
+                accessible={true}
+                accessibilityLabel="Ready to see animal's data."
+                style={styles.button}>
+                <FontAwesome name="search" size={24} style={styles.buttonIcon} />
                 <Text style={styles.buttonText}>開始瀏覽動物資料</Text>
               </TouchableOpacity>
               </Link>
@@ -91,9 +98,13 @@ export default function HomeScreen() {
 }
 
 function createStyles(theme, colorScheme) {
-  return StyleSheet.create({
-    SafeAreaView:{
-      flex:1
+  // 檢查是否為網頁環境
+  const isWeb = Platform.OS === 'web';
+  
+  // 創建基本樣式
+  const styles = {
+    SafeAreaView: {
+      flex: 1
     },
     loadingContainer: {
       flex: 1,
@@ -110,6 +121,21 @@ function createStyles(theme, colorScheme) {
       flex: 1,
       backgroundColor: theme.background,
       padding: 20,
+      // 直接在樣式對象中添加網頁特定的媒體查詢
+      ...(isWeb && {
+        '@media (min-width: 1024px)': {
+          maxWidth: 960,
+          margin: '0 auto',
+        },
+        '@media (min-width: 768px) and (max-width: 1023px)': {
+          maxWidth: 720,
+          margin: '0 auto',
+          padding: 15,
+        },
+        '@media (max-width: 767px)': {
+          padding: 15,
+        },
+      }),
     },
     header: {
       marginBottom: 20,
@@ -120,6 +146,12 @@ function createStyles(theme, colorScheme) {
       fontWeight: 'bold',
       color: theme.text,
       marginBottom: 10,
+      // 直接在樣式對象中添加網頁特定的媒體查詢
+      ...(isWeb && {
+        '@media (max-width: 767px)': {
+          fontSize: 24,
+        },
+      }),
     },
     subtitle: {
       fontSize: 16,
@@ -132,10 +164,19 @@ function createStyles(theme, colorScheme) {
       overflow: 'hidden',
       marginBottom: 20,
       elevation: 3,
-      shadowColor: theme.shaodw,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
+      boxShadowColor: theme.shadow,
+      boxShadowOffset: { width: 0, height: 2 },
+      boxShadowOpacity: 0.1,
+      boxShadowRadius: 4,
+      // 直接在樣式對象中添加網頁特定的媒體查詢
+      ...(isWeb && {
+        '@media (min-width: 768px) and (max-width: 1023px)': {
+          height: 250,
+        },
+        '@media (max-width: 767px)': {
+          height: 180,
+        },
+      }),
     },
     image: {
       width: '100%',
@@ -173,8 +214,8 @@ function createStyles(theme, colorScheme) {
       justifyContent: 'center',
       padding: 15,
       borderRadius: 10,
-      borderColor:colorScheme === 'dark' ? "white" : "black",
-      borderWidth:1
+      borderColor: colorScheme === 'dark' ? "white" : "black",
+      borderWidth: 1
     },
     buttonIcon: {
       marginRight: 10,
@@ -189,6 +230,13 @@ function createStyles(theme, colorScheme) {
       flexDirection: 'row',
       justifyContent: 'space-around',
       marginTop: 10,
+      // 直接在樣式對象中添加網頁特定的媒體查詢
+      ...(isWeb && {
+        '@media (max-width: 767px)': {
+          flexDirection: 'column',
+          alignItems: 'center',
+        },
+      }),
     },
     featureItem: {
       alignItems: 'center',
@@ -200,7 +248,10 @@ function createStyles(theme, colorScheme) {
       color: theme.text,
     },
     themeToggle: {
-      paddingLeft:10, 
+      paddingLeft: 10,
     }
-  });
+  };
+
+  // 將樣式對象轉換為 StyleSheet
+  return StyleSheet.create(styles);
 }

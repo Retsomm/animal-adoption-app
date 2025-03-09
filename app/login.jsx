@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { View, Button, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Button, Text, ActivityIndicator, StyleSheet,TouchableOpacity } from "react-native";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { router } from "expo-router"; // 使用 expo-router 的 router
 import { auth } from "../firebase/firebaseConfig"; // 直接從設定文件引入已初始化的 auth
@@ -42,7 +42,6 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Google 登入</Text>
       
       {error && (
         <View style={styles.errorContainer}>
@@ -53,15 +52,14 @@ const LoginScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <Button 
-          title="使用 Google 登入" 
+        <TouchableOpacity 
+          accessible={true}
+          accessibilityLabel="GMail login"
           onPress={handleGoogleLogin} 
-        />
+          style={styles.button}>
+          <Text style={styles.buttonText}>GMail 登入</Text>
+        </TouchableOpacity>
       )}
-      
-      <Text style={styles.subtitle}>
-        使用 Google 帳號登入以使用完整功能
-      </Text>
     </View>
   );
 };
@@ -82,11 +80,6 @@ function createStyles(theme, colorScheme) {
       marginBottom: 20,
       color: theme.text,
     },
-    subtitle: {
-      marginTop: 20,
-      fontSize: 12,
-      color: theme.text,
-    },
     errorContainer: {
       padding: 10,
       backgroundColor: theme.background,
@@ -97,6 +90,19 @@ function createStyles(theme, colorScheme) {
     },
     errorText: {
       color: "red"
+    },
+    button: {
+      backgroundColor: "#4285F4", // Google 藍色
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      borderRadius: 5,
+      width: "50%",
+      alignItems: "center"
+    },
+    buttonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold"
     }
   });
 }

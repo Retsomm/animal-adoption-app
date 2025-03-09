@@ -1,16 +1,17 @@
 // firebase/firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
+import Constants from 'expo-constants';
 
 // Firebase 配置
 const firebaseConfig = {
-  apiKey: "AIzaSyAhhmuWcbYzpnAgblBS9BZkz_RI-4urRHs",
-  authDomain: "animal-adoption-82e5f.firebaseapp.com",
-  projectId: "animal-adoption-82e5f",
-  storageBucket: "animal-adoption-82e5f.appspot.com",
-  messagingSenderId: "829596529963",
-  appId: "1:829596529963:web:48751793c736487cccc16e",
-  measurementId: "G-Q461RJQ2E6"
+  apiKey: Constants.expoConfig.extra.firebaseApiKey,
+  authDomain: Constants.expoConfig.extra.firebaseAuthDomain,
+  projectId: Constants.expoConfig.extra.firebaseProjectId,
+  storageBucket: Constants.expoConfig.extra.firebaseStorageBucket,
+  messagingSenderId: Constants.expoConfig.extra.firebaseMessagingSenderId,
+  appId: Constants.expoConfig.extra.firebaseAppId,
+  measurementId: Constants.expoConfig.extra.firebaseMeasurementId
 };
 
 // 初始化 Firebase

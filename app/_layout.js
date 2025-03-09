@@ -174,24 +174,28 @@ function createStyles(theme, colorScheme) {
       flex: 1, // 確保 SafeAreaView 撐滿全屏
     }, 
     tabBar: {
+      
       height: 60,
-      paddingLeft:67,
-      paddingHorizontal: 30,
+      paddingLeft:500,
+      marginHorizontal: -30,
       backgroundColor: theme?.background || '#ffffff',
       color: theme?.text || '#000000',
     },
     tabIconContainer: {
+      
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 3,
     },
     tabBarLabel: {
-      fontSize: 12,
+      fontSize: 16,
     },
     tabBarItem: {
+      flexDirection: 'column',
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
+      marginRight:-60,
     },
   });
 }
