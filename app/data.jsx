@@ -1,4 +1,4 @@
-// app/data.jsx
+// app/data.jsx 修正版 - 解決收藏按鈕無反應問題
 import React, { useState, useEffect, useContext } from 'react';
 import { 
   View, 
@@ -10,17 +10,16 @@ import {
   ScrollView,
   Modal,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ThemeContext } from '@/contexts/ThemeContext';
-import { useFavorites } from '../contexts/favorites.context.js';
-
-
+import { useUser } from '../contexts/user.context'; 
+import { getCacheData, setCacheData } from '../firebase/firebaseCacheService';
 
 const DataScreen = () => {
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
-  const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
+  const { colorScheme, theme } = useContext(ThemeContext);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [animals, setAnimals] = useState([]);
@@ -34,6 +33,12 @@ const DataScreen = () => {
     sex: ''
   });
   
+  // 使用 user context
+  const { user, isCollected, addToCollect, removeFromCollect } = useUser();
+  
+  // 添加收藏狀態追蹤
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
   // 篩選選項
   const [areas, setAreas] = useState([]);
   const [kinds, setKinds] = useState([]);
@@ -45,24 +50,42 @@ const DataScreen = () => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [tempFilters, setTempFilters] = useState({...filters});
   const styles = createStyles(theme, colorScheme);
-  // 直接從API獲取數據，不再使用本地代理
+  
   const fetchData = async () => {
     try {
       setLoading(true);
-      // 直接使用原始API URL，而不是透過本地代理
+      
+      // 定義一個快取鍵，可以根據需要添加版本號
+      const cacheKey = 'animal_data_v1'; 
+      
+      // 嘗試從快取獲取資料
+      const cachedData = await getCacheData(cacheKey);
+      
+      if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
+        // 如果有快取資料，直接使用
+        console.log("使用快取資料，總計：", cachedData.length, "筆記錄");
+        setAnimals(cachedData);
+        setFilteredAnimals(cachedData);
+        
+        // 處理篩選選項
+        processFilterOptions(cachedData);
+        
+        setLoading(false);
+        return;
+      }
+      
+      // 如果沒有快取或快取已過期，從 API 獲取資料
+      console.log("快取不可用，從 API 獲取資料");
       const apiUrl = "https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL";
-      console.log("直接從API獲取數據:", apiUrl);
       
       const response = await fetch(apiUrl);
       
-      // 檢查回應狀態
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
       
-      // 確保數據是陣列
       if (!Array.isArray(data)) {
         console.error("API返回的數據不是陣列:", data);
         setAnimals([]);
@@ -71,41 +94,51 @@ const DataScreen = () => {
         return;
       }
       
+      console.log("從 API 獲取資料成功，總計：", data.length, "筆記錄");
+      
+      // 將資料存入快取
+      await setCacheData(cacheKey, data);
+      
       setAnimals(data);
       setFilteredAnimals(data);
-  
+      
       // 處理篩選選項
-      if (data.length > 0) {
-        // 安全地取得所有篩選選項
-        const safeGet = (item, prop) => {
-          if (item && item[prop] !== undefined && item[prop] !== null) {
-            return prop === 'animal_place' ? item[prop].substring(0, 3) : item[prop];
-          }
-          return '';
-        };
-        
-        const uniqueAreas = [...new Set(data.map(item => safeGet(item, 'animal_place')))].filter(Boolean);
-        const uniqueKinds = [...new Set(data.map(item => safeGet(item, 'animal_kind')))].filter(Boolean);
-        const uniqueBodyTypes = [...new Set(data.map(item => safeGet(item, 'animal_bodytype')))].filter(Boolean);
-        const uniqueBreeds = [...new Set(data.map(item => safeGet(item, 'animal_Variety')))].filter(Boolean);
-        const uniqueColors = [...new Set(data.map(item => safeGet(item, 'animal_colour')))].filter(Boolean);
-    
-        setAreas(uniqueAreas);
-        setKinds(uniqueKinds);
-        setBodyTypes(uniqueBodyTypes);
-        setBreeds(uniqueBreeds);
-        setColors(uniqueColors);
-      }
-  
+      processFilterOptions(data);
+      
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching data:", error.message);
-      // 設置空數據，以避免未定義錯誤
+      console.error("獲取資料錯誤:", error.message);
       setAnimals([]);
       setFilteredAnimals([]);
       setLoading(false);
     }
   };
+  
+  // 將篩選選項處理邏輯抽取為一個單獨的函數
+  const processFilterOptions = (data) => {
+    if (data.length > 0) {
+      // 安全地取得所有篩選選項
+      const safeGet = (item, prop) => {
+        if (item && item[prop] !== undefined && item[prop] !== null) {
+          return prop === 'animal_place' ? item[prop].substring(0, 3) : item[prop];
+        }
+        return '';
+      };
+      
+      const uniqueAreas = [...new Set(data.map(item => safeGet(item, 'animal_place')))].filter(Boolean);
+      const uniqueKinds = [...new Set(data.map(item => safeGet(item, 'animal_kind')))].filter(Boolean);
+      const uniqueBodyTypes = [...new Set(data.map(item => safeGet(item, 'animal_bodytype')))].filter(Boolean);
+      const uniqueBreeds = [...new Set(data.map(item => safeGet(item, 'animal_Variety')))].filter(Boolean);
+      const uniqueColors = [...new Set(data.map(item => safeGet(item, 'animal_colour')))].filter(Boolean);
+
+      setAreas(uniqueAreas);
+      setKinds(uniqueKinds);
+      setBodyTypes(uniqueBodyTypes);
+      setBreeds(uniqueBreeds);
+      setColors(uniqueColors);
+    }
+  };
+  
   // 初次載入時抓取資料
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -165,10 +198,59 @@ const DataScreen = () => {
     if (animals.length > 0) {  // 只有當animals有數據時，才應用過濾器
       applyFilters();
     }
-  }, [filters, animals]);
+  }, [filters, animals, forceUpdate]);  // 添加 forceUpdate 依賴
+  
+  // 處理收藏/取消收藏
+  const handleToggleFavorite = async (item) => {
+    if (!item) {
+      console.error('收藏操作錯誤: 項目為空');
+      return;
+    }
+    
+    // 確保有用戶登入
+    if (!user) {
+      console.log('用戶未登入，提示登入');
+      Alert.alert(
+        '需要登入',
+        '請先登入以使用收藏功能',
+        [
+          { text: '取消', style: 'cancel' },
+          { text: '去登入', onPress: () => router.push('/login') }
+        ]
+      );
+      return;
+    }
+    
+    try {
+      const animalId = item.animal_id.toString();
+      console.log('處理收藏/取消收藏，ID:', animalId);
+      
+      // 檢查目前收藏狀態
+      const isCurrentlyCollected = isCollected(animalId);
+      console.log('目前收藏狀態:', isCurrentlyCollected);
+      
+      if (isCurrentlyCollected) {
+        console.log('嘗試取消收藏');
+        await removeFromCollect(animalId);
+        console.log('已從收藏中移除:', animalId);
+      } else {
+        console.log('嘗試添加收藏');
+        await addToCollect(animalId);
+        console.log('已添加到收藏:', animalId);
+      }
+      
+      // 不要重新渲染整個列表，只通知 UI 收藏狀態已更新
+      // 這裡什麼都不做，因為 useUser 會自動更新狀態
+      // 如果需要，可以添加一些視覺反饋
+      
+    } catch (err) {
+      console.error('收藏操作錯誤:', err);
+      Alert.alert('操作失敗', '無法更新收藏狀態，請稍後再試');
+    }
+  };
   
   //渲染動物項目函數
-  const renderAnimalItem = ({ item }) => {
+  const renderAnimalItem = React.useCallback(({ item }) => {
     if (!item) return null;
     
     // 確保 item 是有效的對象
@@ -184,18 +266,17 @@ const DataScreen = () => {
     };
     
     // 檢查動物是否已經在收藏中
-    const isInFavorites = favorites.some(fav => fav.animal_id === item.animal_id);
+    const animalId = item.animal_id?.toString();
+    const isInFavorites = user && animalId ? isCollected(animalId) : false;
     
     return (
       <TouchableOpacity 
         style={styles.animalCard}
-        
         onPress={() => {
           const animalId = String(item.animal_id);
           console.log("正在跳轉到動物ID:", item.animal_id);
-          router.push(`/item/${item.animal_id}`)}
-        }
-          
+          router.push(`/item/${item.animal_id}`);
+        }}
       >
         <View style={styles.animalInfo}>
           {safeItem.album_file ? (
@@ -226,17 +307,14 @@ const DataScreen = () => {
             style={styles.favoriteButton}
             onPress={(e) => {
               e.stopPropagation();
-              if (isInFavorites) {
-                removeFromFavorites(item);
-              } else {
-                addToFavorites(item);
-              }
+              console.log('收藏按鈕被點擊');
+              handleToggleFavorite(item);
             }}
           >
-          <FontAwesome name={isInFavorites ? "heart" : "heart-o"} size={24} color="red" />
-          <Text style={styles.favoriteButtonText}>
-          {isInFavorites ? '取消收藏' : '收藏'}
-        </Text>
+            <FontAwesome name={isInFavorites ? "heart" : "heart-o"} size={24} color="red" />
+            <Text style={styles.favoriteButtonText}>
+              {isInFavorites ? '取消收藏' : '收藏'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity 
             accessible={true}
@@ -244,7 +322,8 @@ const DataScreen = () => {
             style={styles.detailButton}
             onPress={() => {
               console.log("正在從詳細資料按鈕跳轉到動物ID:", item.animal_id);
-              router.push(`/item/${item.animal_id}`)}}
+              router.push(`/item/${item.animal_id}`);
+            }}
           >
             <FontAwesome name="info-circle" size={24} color="gray" />
             <Text style={styles.detailButtonText}>詳細資料</Text>
@@ -252,7 +331,8 @@ const DataScreen = () => {
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [user, isCollected]);
+  
   const renderFilterCollapsible = () => {
     return (
       <TouchableOpacity 
@@ -276,6 +356,7 @@ const DataScreen = () => {
       </TouchableOpacity>
     );
   };
+  
   const renderFilterModal = () => {
     return (
       <Modal
@@ -288,12 +369,11 @@ const DataScreen = () => {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>篩選條件</Text>
             <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-            <FontAwesome name="times" size={24} color="#333" />
-</TouchableOpacity>
+              <FontAwesome name="times" size={24} color="#333" />
+            </TouchableOpacity>
           </View>
           
           <ScrollView style={styles.modalContent}>
-            
             {/* 區域篩選 */}
             <Text style={styles.filterLabel}>地區</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.filterOptions}>
@@ -459,7 +539,7 @@ const DataScreen = () => {
           <FlatList
             data={filteredAnimals}
             renderItem={renderAnimalItem}
-            keyExtractor={(item) => item?.animal_id || Math.random().toString()}
+            keyExtractor={(item) => item?.animal_id?.toString() || Math.random().toString()}
             style={styles.animalList}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
@@ -472,6 +552,7 @@ const DataScreen = () => {
     </SafeAreaView>
   );
 };
+
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
     safeArea: {
@@ -733,4 +814,5 @@ function createStyles(theme, colorScheme) {
     },
   });
 }
+
 export default DataScreen;

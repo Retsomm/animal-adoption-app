@@ -30,7 +30,6 @@ export default function HomeScreen() {
   }
   
   return (
-    <ScrollView>
       <View style={styles.container}>
             <Stack.Screen options={{ title: '首頁' }} />
             
@@ -93,19 +92,11 @@ export default function HomeScreen() {
               </View>
             </View>
       </View>
-    </ScrollView>
   );
 }
 
 function createStyles(theme, colorScheme) {
-  // 檢查是否為網頁環境
-  const isWeb = Platform.OS === 'web';
-  
-  // 創建基本樣式
-  const styles = {
-    SafeAreaView: {
-      flex: 1
-    },
+  return StyleSheet.create({
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
@@ -121,21 +112,6 @@ function createStyles(theme, colorScheme) {
       flex: 1,
       backgroundColor: theme.background,
       padding: 20,
-      // 直接在樣式對象中添加網頁特定的媒體查詢
-      ...(isWeb && {
-        '@media (min-width: 1024px)': {
-          maxWidth: 960,
-          margin: '0 auto',
-        },
-        '@media (min-width: 768px) and (max-width: 1023px)': {
-          maxWidth: 720,
-          margin: '0 auto',
-          padding: 15,
-        },
-        '@media (max-width: 767px)': {
-          padding: 15,
-        },
-      }),
     },
     header: {
       marginBottom: 20,
@@ -146,12 +122,6 @@ function createStyles(theme, colorScheme) {
       fontWeight: 'bold',
       color: theme.text,
       marginBottom: 10,
-      // 直接在樣式對象中添加網頁特定的媒體查詢
-      ...(isWeb && {
-        '@media (max-width: 767px)': {
-          fontSize: 24,
-        },
-      }),
     },
     subtitle: {
       fontSize: 16,
@@ -162,21 +132,12 @@ function createStyles(theme, colorScheme) {
       height: 200,
       borderRadius: 15,
       overflow: 'hidden',
-      marginBottom: 20,
+      marginBottom: 10,
       elevation: 3,
       boxShadowColor: theme.shadow,
       boxShadowOffset: { width: 0, height: 2 },
       boxShadowOpacity: 0.1,
       boxShadowRadius: 4,
-      // 直接在樣式對象中添加網頁特定的媒體查詢
-      ...(isWeb && {
-        '@media (min-width: 768px) and (max-width: 1023px)': {
-          height: 250,
-        },
-        '@media (max-width: 767px)': {
-          height: 180,
-        },
-      }),
     },
     image: {
       width: '100%',
@@ -186,7 +147,7 @@ function createStyles(theme, colorScheme) {
       backgroundColor: theme.background,
       borderRadius: 12,
       padding: 15,
-      marginBottom: 20,
+      marginBottom: 10,
       elevation: 2,
       shadowColor: theme.shaodw,
       shadowOffset: { width: 0, height: 1 },
@@ -198,6 +159,7 @@ function createStyles(theme, colorScheme) {
       fontWeight: 'bold',
       marginBottom: 10,
       color: theme.text,
+      textAlign:'center'
     },
     infoText: {
       fontSize: 14,
@@ -205,7 +167,7 @@ function createStyles(theme, colorScheme) {
       color: theme.text,
     },
     buttonContainer: {
-      marginBottom: 20,
+      marginBottom: 10,
     },
     button: {
       backgroundColor: colorScheme === 'dark' ? "black" : "white",
@@ -229,14 +191,6 @@ function createStyles(theme, colorScheme) {
     featureContainer: {
       flexDirection: 'row',
       justifyContent: 'space-around',
-      marginTop: 10,
-      // 直接在樣式對象中添加網頁特定的媒體查詢
-      ...(isWeb && {
-        '@media (max-width: 767px)': {
-          flexDirection: 'column',
-          alignItems: 'center',
-        },
-      }),
     },
     featureItem: {
       alignItems: 'center',
@@ -250,8 +204,5 @@ function createStyles(theme, colorScheme) {
     themeToggle: {
       paddingLeft: 10,
     }
-  };
-
-  // 將樣式對象轉換為 StyleSheet
-  return StyleSheet.create(styles);
+  });
 }

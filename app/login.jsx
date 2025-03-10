@@ -1,15 +1,33 @@
-import React, { useState, useContext } from "react";
-import { View, Button, Text, ActivityIndicator, StyleSheet,TouchableOpacity } from "react-native";
+import React, { useState, useContext, useEffect, useRef } from "react";
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { router } from "expo-router"; // 使用 expo-router 的 router
-import { auth } from "../firebase/firebaseConfig"; // 直接從設定文件引入已初始化的 auth
+import { router, Stack } from "expo-router";
+import { auth } from "../firebase/firebaseConfig";
 import { ThemeContext } from '@/contexts/ThemeContext';
+import { useUser } from '../contexts/user.context';
 
 const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme, theme } = useContext(ThemeContext);
+  const { user } = useUser();
+  const redirectedRef = useRef(false);
+  
   const styles = createStyles(theme, colorScheme);
+  
+  // 如果用戶已登入，自動跳轉到個人資料頁面
+  // 使用 ref 確保每個渲染週期只執行一次跳轉
+  useEffect(() => {
+    if (user && !redirectedRef.current) {
+      redirectedRef.current = true;
+      console.log("使用者已登入，重定向到個人資料頁面");
+      
+      // 使用 setTimeout 避免路由更新與渲染衝突
+      setTimeout(() => {
+        router.replace("/profile");
+      }, 100);
+    }
+  }, [user]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -22,13 +40,9 @@ const LoginScreen = () => {
         const provider = new GoogleAuthProvider();
         
         // 使用 Firebase 的 signInWithPopup 方法 (適用於網頁環境)
-        const result = await signInWithPopup(auth, provider);
+        await signInWithPopup(auth, provider);
         
-        // 登入成功，使用 expo-router 進行導航
-        console.log("登入成功:", result.user.displayName);
-        
-        // 使用 expo-router 的方式進行導航
-        router.replace("/profile"); // 使用 router.replace 而非 navigation.navigate
+        // 登入成功後，user context 會自動更新，並透過 useEffect 導航到個人資料頁面
       } else {
         throw new Error("目前環境不支援彈出式視窗登入");
       }
@@ -42,7 +56,8 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      
+      <Stack.Screen options={{ title: '登入' }} />
+      <Text style={styles.mentionText}>登入後開始使用收藏功能</Text>
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -50,7 +65,7 @@ const LoginScreen = () => {
       )}
       
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#4285F4" />
       ) : (
         <TouchableOpacity 
           accessible={true}
@@ -72,7 +87,6 @@ function createStyles(theme, colorScheme) {
       alignItems: "center",
       padding: 20,
       backgroundColor: theme.background,
-      color: theme.text,
     },
     title: {
       fontSize: 24,
@@ -86,7 +100,6 @@ function createStyles(theme, colorScheme) {
       borderRadius: 5,
       marginBottom: 15,
       width: "100%",
-      color: theme.text,
     },
     errorText: {
       color: "red"
@@ -103,6 +116,11 @@ function createStyles(theme, colorScheme) {
       color: "white",
       fontSize: 16,
       fontWeight: "bold"
+    },
+    mentionText:{
+      fontSize:24,
+      color:theme.text,
+      marginBottom:30,
     }
   });
 }

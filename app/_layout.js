@@ -10,6 +10,7 @@ import { useContext } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '../firebase/firebaseConfig';
+import { UserProvider } from '../contexts/user.context'; // 添加 UserProvider
 
 // 初始化 Firebase Auth
 const auth = getAuth(app);
@@ -19,7 +20,9 @@ SplashScreen.preventAutoHideAsync(); // 確保載入畫面不會提前消失
 export default function AppLayout() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <UserProvider> {/* 添加 UserProvider 包裹 */}
+        <AppContent />
+      </UserProvider>
     </ThemeProvider>
   );
 }
@@ -47,28 +50,24 @@ function AppContent() {
     };
   }, []);
 
-  // 使用 useCallback 來確保函數引用穩定，並且正確訪問最新的 user 和 router
-  const handleUserTabPress = useCallback(() => {
-    console.log('處理用戶標籤點擊，當前用戶狀態:', user ? '已登入' : '未登入');
-    console.log('當前路徑:', pathname);
+  // 保持原有的使用者標籤點擊處理邏輯
+  const handleUserTabPress = useCallback((e) => {
+    // 防止默認導航行為
+    e.preventDefault();
     
-    // 如果已登入
+    // 直接檢查當前的用戶狀態
+    console.log('處理用戶標籤點擊，當前用戶狀態:', user ? '已登入' : '未登入');
+    
+    // 已登入狀態直接導向到個人資料頁面
     if (user) {
-      // 只有當不在 profile 頁面時才導航
-      if (pathname !== '/profile') {
-        console.log('導航到 profile 頁面');
-        router.navigate('/profile');
-      }
-      // 否則不做任何操作，保持在當前頁面
+      console.log('用戶已登入，直接導向個人資料頁面');
+      router.navigate('/profile');
     } else {
-      // 只有當不在 login 頁面時才導航
-      if (pathname !== '/login') {
-        console.log('導航到 login 頁面');
-        router.navigate('/login');
-      }
-      // 否則不做任何操作，保持在當前頁面
+      // 未登入狀態直接導向到登入頁面
+      console.log('用戶未登入，直接導向登入頁面');
+      router.navigate('/login');
     }
-  }, [user, router, pathname]);
+  }, [user, router]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -139,11 +138,7 @@ function AppContent() {
               headerShown: false,
             }}
             listeners={{
-              tabPress: (e) => {
-                // 防止默認導航行為
-                e.preventDefault();
-                handleUserTabPress();
-              }
+              tabPress: handleUserTabPress
             }}
           />
           
@@ -174,7 +169,6 @@ function createStyles(theme, colorScheme) {
       flex: 1, // 確保 SafeAreaView 撐滿全屏
     }, 
     tabBar: {
-      
       height: 60,
       paddingLeft:500,
       marginHorizontal: -30,
@@ -182,7 +176,6 @@ function createStyles(theme, colorScheme) {
       color: theme?.text || '#000000',
     },
     tabIconContainer: {
-      
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 3,
